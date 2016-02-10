@@ -16,12 +16,13 @@ test_matrix <- matrix(c(1111, 2222, 3333, 4444, 5555, 6666, 7777, 8888, 9999, 99
 # Next I create a function that performs the calculation for Leemis' m statistic
 
 m_fun <- function(test){
-  x1 <- prop.table(substr(as.character(test), start=1, stop=1))
-  # This should convert the input vector/matrix to character so that substr may be used
-  # substr is used to select the first item in each element of the vector or matrix
-  # prop.table gives the proportions of the first item in each element
-  x <- as.numeric(x1)
-  # Convert back to numeric from character to use in calculation
+  x1 <- table((as.numeric(substr(as.character(test), start=1, stop=1))))
+  # Convert the input vector/matrix to character so that substring may be used
+  # Substring is used to select the first item in each element of the vector or matrix
+  # Convert back to numeric to use in table and in formula
+  # Creates a table showing how many times each integer 1:9 appears
+  x <- x1/sum(table((as.numeric(substr(as.character(test), start=1, stop=1)))))
+  # Divide the previous table of frequencies by the total number of elements to find proportions
   i <- 1:9
   # i is the integers 1:9, all possible values to find the proportional frequency of
   m_stat <- max(x - log10(1 + (1 / i)))
@@ -29,22 +30,28 @@ m_fun <- function(test){
   return(list(m_stat, x))
   # Returns list of m statistic and proportional frequencies (digit distribution) in results
   }
+# Test if this works with test vector and test matrix
+m_fun(test=test_vector)
+m_fun(test=test_matrix)
+# Works with both, returning the m statistic and list of proportional frequencies
 
-m_fun(test_matrix)
-# Why doesn't this work?
-# Once I get m_fun, apply same to d_fun
 # Create function d_fun that runs calculation for Cho-Gains d statistic
-
 # Same as m_fun, but for the Cho-Gains d statistic
-d_fun <- function(freq){
+d_fun <- function(test) {
+  x1 <- table((as.numeric(substr(as.character(test), start=1, stop=1))))
+  x <- x1/sum(table((as.numeric(substr(as.character(test), start=1, stop=1)))))
   i <- 1:9
-  d_stat <- sqrt(sum(freq-log10(1+(1/i)))^2)
-  return(list(d_stat, x)
+  d_stat <- sqrt(sum(x-log10(1+(1/i)))^2)
+  return(list(d_stat, x))
 }
+# Test if this works with test vector and matrix
+d_fun(test=test_vector)
+d_fun(test=test_matrix)
 
 # Create function that brings the two previous calculations together
 # The function benford_fun inputs raw election data as either a matrix or vector
-# It gives the user the option of choosing to calculate the m statistic, d statistic, or both
+# It gives the user the option of choosing to calculate
+## the m statistic (Leemis), d statistic (Cho-Gains), or both
 benford_fun <- function(test, option = c("Leemis", "Cho-Gains", "Both")){
   if(option == "Leemis"){
     return(m_fun(test))
@@ -56,15 +63,17 @@ benford_fun <- function(test, option = c("Leemis", "Cho-Gains", "Both")){
     return(list("Leemis" = m_fun(test), "Cho-Gains" = d_fun(test)))
   }
 }
-# Test if this works
-benford_fun(test=, "Both")
+# Test if this works, examples:
+benford_fun(test=test_vector, "Both")
+benford_fun(test=test_matrix, "Both")
 
 # 2
 ##### Question::: what about if leemis or chogains is equal to one of the numbers??
 #### Also: how to make it so leemis/chogains are not inputs into print.benfords?
 print.benfords <- function(test=test_vector, leemis_m=.9, chogains_d=1.3){
   # The inputs are the raw data, the m statistic, and the d statistic
-  benford_fun(test, "Both")
+  results <- benford_fun(test, "Both")
+  results$
   # Return the result from running both the m and d statistics from above
   if(leemis_m < .851){
     return("ns")
@@ -101,4 +110,4 @@ benford_csv <- function(x){
   print.benfords(x)
   sink("printbenfords.csv")
 }
- 
+ # create new function to save previous table to directory using sink()
