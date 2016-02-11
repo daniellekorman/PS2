@@ -15,7 +15,7 @@ test_matrix <- matrix(c(1111, 2222, 3333, 4444, 5555, 6666, 7777, 8888, 9999, 99
 
 # Next I create a function that performs the calculation for Leemis' m statistic
 
-m_fun <- function(test){
+m_fun <- function(test) {
   x1 <- table((as.numeric(substr(as.character(test), start=1, stop=1))))
   # Convert the input vector/matrix to character so that substring may be used
   # Substring is used to select the first item in each element of the vector or matrix
@@ -52,7 +52,7 @@ d_fun(test=test_matrix)
 # The function benford_fun inputs raw election data as either a matrix or vector
 # It gives the user the option of choosing to calculate
 ## the m statistic (Leemis), d statistic (Cho-Gains), or both
-benford_fun <- function(test, option = c("Leemis", "Cho-Gains", "Both")){
+benford_fun <- function(test, option = c("Leemis", "Cho-Gains", "Both")) {
   if(option == "Leemis"){
     return(m_fun(test))
   }
@@ -67,21 +67,27 @@ benford_fun <- function(test, option = c("Leemis", "Cho-Gains", "Both")){
 benford_fun(test=test_vector, "Both")
 benford_fun(test=test_matrix, "Both")
 
-# 2
-##### Question::: what about if leemis or chogains is equal to one of the numbers??
-#### Also: how to make it so leemis/chogains are not inputs into print.benfords?
-print.benfords <- function(test=test_vector, leemis_m=.9, chogains_d=1.3){
-  # The inputs are the raw data, the m statistic, and the d statistic
+# Question 2
+print.benfords <- function(test) {
+  # The input is the raw data (vector or matrix)
   results <- benford_fun(test, "Both")
-  results$
-  # Return the result from running both the m and d statistics from above
-  if(leemis_m < .851){
+  # Creates object "results" that includes the previous benford_fun returning both m and d statistics
+  leemis_m <- as.numeric(results$"Leemis"[1])
+  # Creates object leemis_m to use later, of just the calculated m statistic
+  print(c("Leemis' m statistic =", leemis_m))
+  # Prints the m statistic and distribution as found above
+  chogains_d <- as.numeric(results$"Cho-Gains"[1])
+  print(c("Cho-Gain's d statistic =", chogains_d))
+  # Same for d statistic  
+  # Next, use objects created above to return proper number of asterisks
+  ## based on significance level of statistic
+  if(leemis_m < .851) {
     return("ns")
   }
-  if(.851 < leemis_m < .967) {
+  if(.851 < leemis_m & leemis_m < .967) {
     return("*")
   }
-  if(.967 < leemis_m < 1.212) {
+  if(.967 < leemis_m & leemis_m < 1.212) {
     return("**")
   }
   if(leemis_m > 1.212) {
@@ -90,10 +96,10 @@ print.benfords <- function(test=test_vector, leemis_m=.9, chogains_d=1.3){
   if(chogains_d < 1.212) {
     return("ns")
   }
-  if(1.212 < chogains_d < 1.330) {
+  if(1.212 < chogains_d & chogains_d < 1.330) {
     return("*")
   }
-  if(1.330 < chogains_d < 1.569) {
+  if(1.330 < chogains_d & chogains_d < 1.569) {
     return("**")
   }
   if(chogains_d > 1.569) {
@@ -101,13 +107,16 @@ print.benfords <- function(test=test_vector, leemis_m=.9, chogains_d=1.3){
   }
   print(c("* = significance at the .10 level", "** = significance at the .05 level", "*** = significance at the .01 level", "ns = not significant"))
 }
-######## error with brackets??
 
-# Create csv with print.benfords table
-######Question: not sure what this question means "a directory provided as an argument..."
-?sink
-benford_csv <- function(x){
-  print.benfords(x)
-  sink("printbenfords.csv")
+# Test
+print.benfords(test=test_vector)
+print.benfords(test=test_matrix)
+
+# Create new function to save previous table to directory (PS2) using sink()
+benford_csv <- function(test=test_vector){
+  print.benfords(test)
+  setwd("/Users/drk/Desktop/R!/PS2")
+  sink("printbenfords.csv", append=TRUE)
 }
- # create new function to save previous table to directory using sink()
+benford_csv(test=test_vector)
+# Run function with test results
